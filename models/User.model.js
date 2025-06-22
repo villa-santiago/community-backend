@@ -33,6 +33,13 @@ const userSchema = new Schema(
       default: 'user'
     },
 
+      savedPosts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Post'
+      }
+    ],
+
     // fullName: {
     //   type: String,
     //   trim: true
@@ -46,7 +53,7 @@ const userSchema = new Schema(
     // },
 
   },
-  
+
   {
     timestamps: true
   }
