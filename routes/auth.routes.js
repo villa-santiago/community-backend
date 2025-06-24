@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/User.model");
 
+const {isAuthenticated} = require("../middleware/jwt.middleware");
+
 const router = express.Router();
 const saltRounds = 10;
 
@@ -92,6 +94,13 @@ router.post('/login', (req, res) => {
     }
 })
 .catch (err => res.status(500).json({message: "internal server error"}));
+});
+
+//AUTH - VERIFY
+router.get('/verify', isAuthenticated, (req, res, next) => {
+    console.log('req.payload', req.payload);
+
+    res.status(200).json(req.payload);
 });
 
 module.exports = router;
