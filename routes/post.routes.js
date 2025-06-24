@@ -7,7 +7,7 @@ const Post = require("../models/Post.model");
 
 const {isAuthenticated} = require("../middleware/jwt.middleware");
 
-//POST - CREATE NEW POST IF USER IS LOGGEDIN
+//POST - CREATE NEW POST IF USER IS AUTH'D
 router.post("/", isAuthenticated, (req, res, next) => {
     const {service, description, category, location, email, phone} = req.body;
     const owner = req.payload._id;
