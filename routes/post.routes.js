@@ -106,6 +106,35 @@ router.put("/:postId", isAuthenticated, (req, res, next) => {
     });
 });
 
+// POST - DELETE POST BY ID
+router.delete("/:postId", isAuthenticated, (req, res, next) => {
+  const { postId } = req.params;
+  const loggedInUserId = req.payload._id;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        return res.status(404).json({ message: `Post ${postId} not found` });
+      }
+
+      if (post.owner.toString() !== loggedInUserId) {
+        return res.status(403).json({ message: "Unauthorized to delete this post" });
+      }
+
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((deletedPost) => {
+      if (deletedPost) {
+        console.log(`Post ${postId} successfully deleted`);
+        res.status(200).json({ message: `Post ${postId} has been deleted` });
+      }
+    })
+    .catch((err) => {
+      console.error("Delete error:", err);
+      res.status(500).json({ message: "Failed to delete post" });
+    });
+});
+
     
 
 
