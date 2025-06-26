@@ -48,16 +48,16 @@ router.delete("/saved-posts/:postId", isAuthenticated, (req, res) => {
   const userId = req.payload._id;
   const { postId } = req.params;
 
-  // Validate the post ID format
+ 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return res.status(400).json({ message: "Invalid post ID" });
   }
 
-  // Find the user and update their savedPosts by removing the postId
+  
   User.findByIdAndUpdate(
     userId,
-    { $pull: { savedPosts: postId } }, // Remove postId from array
-    { new: true } // Return the updated user
+    { $pull: { savedPosts: postId } }, 
+    { new: true } 
   )
     .then((updatedUser) => {
       if (!updatedUser) {
@@ -74,6 +74,30 @@ router.delete("/saved-posts/:postId", isAuthenticated, (req, res) => {
       res.status(500).json({ message: "Failed to remove saved post" });
     });
 });
+
+// GET - Retrieve all saved posts for the logged-in user
+router.get("/saved-posts", isAuthenticated, (req, res) => {
+  const userId = req.payload._id;
+
+  User.findById(userId)
+    .populate("savedPosts") // This will fetch full post objects
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({
+        message: "Saved posts retrieved successfully",
+        savedPosts: user.savedPosts,
+      });
+    })
+    .catch((err) => {
+      console.error("Error fetching saved posts", err);
+      res.status(500).json({ message: "Failed to retrieve saved posts" });
+    });
+});
+
+
 
 
 
