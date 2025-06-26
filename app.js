@@ -20,6 +20,11 @@ app.use('/auth', authRoutes);
 const postRoutes = require('./routes/post.routes');
 app.use('/posts', postRoutes);
 
+//User routes
+const userRoutes = require("./routes/user.routes");
+app.use("/users", userRoutes);
+
+
 //Entry point routes
 app.get('/', (req, res) => {
   res.json({ message: 'Project API is running' });
