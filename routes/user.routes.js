@@ -80,7 +80,7 @@ router.get("/saved-posts", isAuthenticated, (req, res) => {
   const userId = req.payload._id;
 
   User.findById(userId)
-    .populate("savedPosts") // This will fetch full post objects
+    .populate("savedPosts")
     .then((user) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -96,6 +96,26 @@ router.get("/saved-posts", isAuthenticated, (req, res) => {
       res.status(500).json({ message: "Failed to retrieve saved posts" });
     });
 });
+
+// GET - Get all posts created by the logged-in user
+router.get("/my-posts", isAuthenticated, (req, res) => {
+  const userId = req.payload._id;
+
+  Post.find({ owner: userId })
+    .sort({ createdAt: -1 })
+    .populate("owner", "userName profileImage")
+    .then((myPosts) => {
+      res.status(200).json({
+        message: "User's posts retrieved successfully",
+        myPosts,
+      });
+    })
+    .catch((err) => {
+      console.error("Error retrieving user's posts:", err);
+      res.status(500).json({ message: "Failed to fetch user's posts" });
+    });
+});
+
 
 
 
