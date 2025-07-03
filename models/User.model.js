@@ -40,17 +40,17 @@ const userSchema = new Schema(
       }
     ],
 
-    // fullName: {
-    //   type: String,
-    //   trim: true
-    // },
+    fullName: {
+      type: String,
+      trim: true
+    },
 
-    // location: String,
+    location: String,
 
-    // bio: {
-    //   type: String,
-    //   maxlength: 300
-    // },
+    bio: {
+      type: String,
+      maxlength: 300
+    },
 
   },
 

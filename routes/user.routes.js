@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const User = require("../models/User.model");
 const Post = require("../models/Post.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
-//Save a post to the logged-in user's savedPosts list
+// Save a post to the logged-in user's savedPosts list
 router.post("/saved-posts/:postId", isAuthenticated, (req, res) => {
   const userId = req.payload._id;
   const { postId } = req.params;
@@ -44,22 +45,19 @@ router.post("/saved-posts/:postId", isAuthenticated, (req, res) => {
     });
 });
 
-
-//Remove a post from the logged-in user's savedPosts list
+// Remove a post from the logged-in user's savedPosts list
 router.delete("/saved-posts/:postId", isAuthenticated, (req, res) => {
   const userId = req.payload._id;
   const { postId } = req.params;
 
- 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return res.status(400).json({ message: "Invalid post ID" });
   }
 
-  
   User.findByIdAndUpdate(
     userId,
-    { $pull: { savedPosts: postId } }, 
-    { new: true } 
+    { $pull: { savedPosts: postId } },
+    { new: true }
   )
     .then((updatedUser) => {
       if (!updatedUser) {
@@ -118,10 +116,66 @@ router.get("/my-posts", isAuthenticated, (req, res) => {
     });
 });
 
+// PATCH /users/profile — update bio, location, profileImage
+router.patch("/profile", isAuthenticated, (req, res, next) => {
+  const userId = req.payload._id;
+  const { bio, location, profileImage } = req.body;
 
+  const updateFields = {};
+  if (bio !== undefined) updateFields.bio = bio;
+  if (location !== undefined) updateFields.location = location;
+  if (profileImage !== undefined) updateFields.profileImage = profileImage;
 
+  User.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: true })
+    .then(updatedUser => {
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+    })
+    .catch(err => {
+      console.error("Error updating profile:", err);
+      if (err.name === "ValidationError") {
+        return res.status(400).json({ message: err.message });
+      }
+      res.status(500).json({ message: "Failed to update profile" });
+    });
+});
 
+// PATCH /users/password — change current password
+router.patch("/password", isAuthenticated, async (req, res) => {
+  const userId = req.payload._id;
+  const { currentPassword, newPassword } = req.body;
 
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: "Ambas contraseñas son obligatorias." });
+  }
 
+  if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(newPassword)) {
+    return res.status(400).json({
+      message: "La nueva contraseña debe tener al menos 6 caracteres, incluyendo mayúsculas, minúsculas y un número.",
+    });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    const isPasswordValid = bcrypt.compareSync(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "La contraseña actual es incorrecta." });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("Error updating password:", err);
+    res.status(500).json({ message: "Error al actualizar la contraseña." });
+  }
+});
 
 module.exports = router;

@@ -97,25 +97,21 @@ router.post('/login', (req, res) => {
 });
 
 //AUTH - VERIFY
-router.get('/verify', isAuthenticated, async (req, res, next) => {
+router.get('/verify', isAuthenticated, async (req, res) => {
   try {
-    const user = await User.findById(req.payload._id).populate("savedPosts");
+    const user = await User.findById(req.payload._id).select(
+      "email userName bio location profileImage savedPosts"
+    );
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json({
-      _id: user._id,
-      email: user.email,
-      userName: user.userName,
-      savedPosts: user.savedPosts.map(post => post._id),
-    });
+    res.status(200).json(user);
   } catch (err) {
-    console.error("Verify route error:", err);
-    res.status(500).json({ message: "Internal server error." });
+    console.error("Error verifying user:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 module.exports = router;
