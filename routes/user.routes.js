@@ -178,4 +178,23 @@ router.patch("/password", isAuthenticated, async (req, res) => {
   }
 });
 
+// DELETE /users/delete — delete the logged-in user's account
+router.delete("/delete", isAuthenticated, async (req, res) => {
+  const userId = req.payload._id;
+
+  try {
+    // Optional: Remove posts owned by this user
+    await Post.deleteMany({ owner: userId });
+
+    // Remove the user
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ message: "Cuenta eliminada correctamente." });
+  } catch (err) {
+    console.error("Error deleting account:", err);
+    res.status(500).json({ message: "Error al eliminar la cuenta." });
+  }
+});
+
+
 module.exports = router;

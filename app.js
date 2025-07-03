@@ -30,6 +30,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Project API is running' });
 });
 
+
 //Testing the connection with the frontend
 app.get("/api/ping", (req, res) => {
   res.json({ message: "pong from backend" });
