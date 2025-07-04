@@ -196,5 +196,45 @@ router.delete("/delete", isAuthenticated, async (req, res) => {
   }
 });
 
+// GET /users/:userId/posts — Public: get posts by userId
+router.get("/:userId/posts", (req, res) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+
+  Post.find({ owner: userId })
+    .sort({ createdAt: -1 })
+    .populate("owner", "userName profileImage")
+    .then(posts => {
+      res.status(200).json({ posts });
+    })
+    .catch(err => {
+      console.error("Error fetching public posts:", err);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    });
+});
+
+// GET /users/:userId — fetch public profile info
+router.get("/:userId", isAuthenticated, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("userName profileImage bio location");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user });
+  } catch (err) {
+    console.error("Error fetching public profile:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
 
 module.exports = router;
