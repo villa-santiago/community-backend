@@ -183,7 +183,7 @@ router.delete("/delete", isAuthenticated, async (req, res) => {
   const userId = req.payload._id;
 
   try {
-    // Optional: Remove posts owned by this user
+    // Remove posts owned by this user
     await Post.deleteMany({ owner: userId });
 
     // Remove the user

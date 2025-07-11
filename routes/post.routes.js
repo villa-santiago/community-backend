@@ -135,46 +135,5 @@ router.delete("/:postId", isAuthenticated, (req, res, next) => {
     });
 });
 
-//POST - Save a post to the saved posts array
-// router.post("/:postId/save", isAuthenticated, (req, res) => {
-//   const { postId } = req.params;
-//   const userId = req.payload._id;
-
-  
-//   if (!mongoose.Types.ObjectId.isValid(postId)) {
-//     return res.status(400).json({ message: "Invalid post ID" });
-//   }
-
-  
-//   User.findById(userId)
-//     .then((user) => {
-//       if (!user) {
-//         return res.status(404).json({ message: "User not found" });
-//       }
-
-      
-//       if (user.savedPosts.includes(postId)) {
-//         return res.status(400).json({ message: "Post already saved" });
-//       }
-
-      
-//       user.savedPosts.push(postId);
-
-      
-//       return user.save();
-//     })
-//     .then((updatedUser) => {
-      
-//       res.status(200).json({
-//         message: "Post saved successfully",
-//         savedPosts: updatedUser.savedPosts,
-//       });
-//     })
-//     .catch((err) => {
-      
-//       console.error("Error saving post", err);
-//       res.status(500).json({ message: "Failed to save post" });
-//     });
-// });
 
 module.exports = router;

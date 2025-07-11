@@ -11,7 +11,6 @@ const userSchema = new Schema(
 
     profileImage: {
       type: String,
-      // default: insert hosted image URL
       },
 
     email: {
